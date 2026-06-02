@@ -1,24 +1,26 @@
-import { User } from "../models/user.model";
+import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import { configDotenv } from "dotenv"
+import dotenv from "dotenv"
+dotenv.config()
+
 
 const jwt_secret = process.env.JWT_SECRET
 async function registerUser(req,res) {
 
     const {name, email, password} = req.body
 
-    const isUserAlreadyExit = await userModel.findOne({
+    const isUserAlreadyExit = await User.findOne({
         email
     })
     
     if(isUserAlreadyExit){ 
         return res.status(400).json({ 
             message: "User already exists"
-    })
+    })}
     
     const hashedPassword = await bcrypt.hash(password,10)
-    const user = await userModel.create({
+    const user = await User.create({
         name, 
         email, 
         password : hashedPassword
@@ -39,7 +41,11 @@ async function registerUser(req,res) {
         }
     })
 
-}}
+}
+
+async function loginUser() { 
+    console.log("Hello")
+}
 
 
-export {registerUser}
+export {registerUser,loginUser}
