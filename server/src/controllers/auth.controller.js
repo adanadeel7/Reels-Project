@@ -169,4 +169,5 @@ async function logoutFoodPartner(req,res) {
         })
 }
 
-export {registerUser,loginUser,logoutUser,registerFoodPartner,loginFoodPartner}
+
+export {registerUser,loginUser,logoutUser,registerFoodPartner,loginFoodPartner,logoutFoodPartner}
