@@ -12,6 +12,6 @@ app.use(express.json())
 
 
 app.use('/api/auth', authRoutes)
-app.use('/api/auth', foodRoutes)
+app.use('/api/food', foodRoutes)
 
 export default app;
