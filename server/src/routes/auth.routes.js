@@ -3,12 +3,10 @@ import {registerUser,loginUser,logoutUser, registerFoodPartner, loginFoodPartner
 const router = express.Router()
 
 
-//User Auth
 router.post('/user/register', registerUser)
 router.post('/user/login', loginUser)
 router.get('/user/logout',logoutUser)
 
-//Food Partner Auth
 router.post('/food/register',registerFoodPartner)
 router.post('/food/login',loginFoodPartner)
 router.get('/food/logout',logoutFoodPartner)
