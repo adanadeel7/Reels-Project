@@ -1,5 +1,5 @@
 import express from "express"; 
-import createFood, { getFoodItems, getSaveFood, likeFood,saveFood } from "../controllers/food.controller.js";
+import  {createFood, getFoodItems, getSaveFood, likeFood,saveFood } from "../controllers/food.controller.js";
 import {authFoodPartnerMiddleware,authUserMiddleware} from "../middlewares/auth.middleware.js";
 import multer from 'multer'
 const foodRouter = express.Router()

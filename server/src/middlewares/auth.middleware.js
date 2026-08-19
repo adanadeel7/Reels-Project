@@ -17,9 +17,7 @@ async function authFoodPartnerMiddleware(req,res,next) {
         const Partner = await foodPartner.findById(decoded.id)
 
         req.foodPartner = Partner
-        return res.status(201).json({
-            message : " Succesfully created"
-        })
+        
         next()
 
     
@@ -42,11 +40,9 @@ async function  authUserMiddleware(req,res,next) {
     
     try { 
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        const user = await User.findById(decode.id); 
+        const user = await User.findById(decoded.id); 
         req.user = user
-        return res.status(201).json({
-            message : " Succesfully created"
-        })
+        
         next()
     
     } catch (err) {
