@@ -190,7 +190,7 @@ function VideoCard({ dish, isActive, onPartnerClick }) {
       {/* Scrim Overlay */}
       <div 
         onClick={handleVideoClick}
-        className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 z-10 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 z-10 pointer-events-auto cursor-pointer"
       />
 
       {/* Mute Toggle Icon Overlay (Top-Right) */}

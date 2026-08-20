@@ -4,7 +4,14 @@ import api from '../utils/api';
 
 const CATEGORIES = ['All', 'Pasta', 'Pizza', 'Seafood', 'Dessert', 'Bestseller', 'Spicy', 'Vegan'];
 
-function Discover() {
+function getYouTubeId(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
+function Discover({ onSelectDish }) {
   const [dishes, setDishes] = useState([]);
   const [filteredDishes, setFilteredDishes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,8 +39,8 @@ function Discover() {
   useEffect(() => {
     let result = dishes;
 
-    // Filter by search term
-    if (searchTerm.trim() !== '') {
+    // Filter by search search Term
+    if (searchTerm.trim()) {
       result = result.filter(
         (dish) =>
           dish.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -58,7 +65,7 @@ function Discover() {
   }, [searchTerm, selectedCategory, dishes]);
 
   return (
-    <div className="w-full h-full flex flex-col p-6 overflow-y-auto pb-24">
+    <div className="w-full flex-1 min-h-0 flex flex-col p-6 overflow-y-auto pb-24">
       {/* Search Header */}
       <div className="mb-6 flex flex-col gap-4">
         <div>
@@ -117,15 +124,25 @@ function Discover() {
           {filteredDishes.map((dish) => (
             <div
               key={dish._id}
+              onClick={() => onSelectDish && onSelectDish(dish._id)}
               className="group bg-surface-subtle rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 border border-slate-100 flex flex-col relative cursor-pointer"
             >
               <div className="relative aspect-[9/16] w-full overflow-hidden bg-black">
-                <video
-                  src={dish.video}
-                  className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
-                  muted
-                  playsInline
-                />
+                {getYouTubeId(dish.video) ? (
+                  <img
+                    src={`https://img.youtube.com/vi/${getYouTubeId(dish.video)}/hqdefault.jpg`}
+                    alt={dish.name}
+                    className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
+                  />
+                ) : (
+                  <video
+                    src={dish.video}
+                    className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
+                    muted
+                    playsInline
+                    referrerPolicy="no-referrer"
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
                 
                 {/* Details Overlay */}

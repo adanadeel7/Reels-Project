@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
+function getYouTubeId(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
 function PartnerDashboard() {
   const [activeTab, setActiveTab] = useState('my-dishes');
   const [dishes, setDishes] = useState([]);
@@ -342,13 +349,21 @@ function PartnerDashboard() {
                     >
                       <div className="relative aspect-[9/16] w-full overflow-hidden bg-black">
                         {/* Video / Image render */}
-                        <video
-                          src={dish.video}
-                          className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
-                          muted
-                          playsInline
-                          referrerPolicy="no-referrer"
-                        />
+                        {getYouTubeId(dish.video) ? (
+                          <img
+                            src={`https://img.youtube.com/vi/${getYouTubeId(dish.video)}/hqdefault.jpg`}
+                            alt={dish.name}
+                            className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
+                          />
+                        ) : (
+                          <video
+                            src={dish.video}
+                            className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
+                            muted
+                            playsInline
+                            referrerPolicy="no-referrer"
+                          />
+                        )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
                         <div className="absolute bottom-3 left-3 right-3 text-white">
                           <p className="font-semibold text-lg truncate">{dish.name}</p>
@@ -574,15 +589,24 @@ function PartnerDashboard() {
                     
                     {/* Video Background Mock */}
                     {videoUrl ? (
-                      <video
-                        src={videoUrl}
-                        className="absolute inset-0 w-full h-full object-cover z-0"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        referrerPolicy="no-referrer"
-                      />
+                      getYouTubeId(videoUrl) ? (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${getYouTubeId(videoUrl)}?autoplay=1&mute=1&loop=1&playlist=${getYouTubeId(videoUrl)}&controls=0`}
+                          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none scale-[1.35] origin-center"
+                          title="Preview"
+                          frameBorder="0"
+                        />
+                      ) : (
+                        <video
+                          src={videoUrl}
+                          className="absolute inset-0 w-full h-full object-cover z-0"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          referrerPolicy="no-referrer"
+                        />
+                      )
                     ) : (
                       <div
                         className="absolute inset-0 bg-cover bg-center z-0"

@@ -64,7 +64,7 @@ function Profile() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col p-6 overflow-y-auto pb-24 items-center bg-white">
+    <div className="w-full flex-1 min-h-0 flex flex-col p-6 overflow-y-auto pb-24 items-center bg-white">
       {/* Header */}
       <div className="w-full mb-6 text-left">
         <h1 className="text-2xl font-bold text-on-surface mb-1">My Profile</h1>

@@ -51,6 +51,14 @@ function Home() {
     }
   };
 
+  const handleSubTabChange = (subTab) => {
+    setActiveSubTab(subTab);
+    setActiveCardIndex(0);
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  };
+
   // Filter between Trending and Near You
   useEffect(() => {
     if (activeSubTab === 'near-you') {
@@ -59,15 +67,16 @@ function Home() {
     } else {
       setFilteredDishes(dishes);
     }
-    setActiveCardIndex(0); // Reset index on filter change
   }, [activeSubTab, dishes]);
 
   const handleScroll = (e) => {
     if (containerRef.current) {
       const { scrollTop, clientHeight } = e.target;
-      const index = Math.round(scrollTop / clientHeight);
-      if (index !== activeCardIndex) {
-        setActiveCardIndex(index);
+      if (clientHeight > 0) {
+        const index = Math.round(scrollTop / clientHeight);
+        if (index !== activeCardIndex) {
+          setActiveCardIndex(index);
+        }
       }
     }
   };
@@ -80,17 +89,20 @@ function Home() {
   };
 
   const handleSelectDish = (dishId) => {
-    const index = dishes.findIndex((d) => d._id === dishId);
-    if (index !== -1) {
-      setActiveSubTab('trending'); // Reset filter to show all
-      setActiveCardIndex(index);
-      setActiveTab('reels');
-      setTimeout(() => {
-        if (containerRef.current) {
-          containerRef.current.scrollTop = index * containerRef.current.clientHeight;
-        }
-      }, 100);
-    }
+    setActiveSubTab('trending');
+    const targetList = dishes;
+    setFilteredDishes(targetList);
+    const index = targetList.findIndex((d) => d._id === dishId);
+    const targetIndex = index !== -1 ? index : 0;
+    
+    setActiveTab('reels');
+    setActiveCardIndex(targetIndex);
+
+    setTimeout(() => {
+      if (containerRef.current) {
+        containerRef.current.scrollTop = targetIndex * containerRef.current.clientHeight;
+      }
+    }, 150);
   };
 
   return (
@@ -105,13 +117,16 @@ function Home() {
       {/* Top Header - Responsive */}
       <header className="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm flex items-center justify-between px-6 h-14 select-none">
         <div 
-          onClick={() => { setActiveTab('reels'); setActiveSubTab('trending'); }}
+          onClick={() => { setActiveTab('reels'); handleSubTabChange('trending'); }}
           className="flex items-center gap-2 cursor-pointer select-none active:scale-[0.98] transition-transform"
         >
           <img
             alt="Food Reels Logo"
             className="h-7 w-auto object-contain"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0VABG-cuelurZYpi7bsTWNGVocNdcfNewcEK1xoouPuRQ5Y29bxpmqVTjRr3McSPG8UfgnhG-OpXkzajUcWy21B249rOvak-ndLv-GUL1RsQYZgfUFr3dkHYZhdk0TygA60ZBL2zdFucOuBdqSnxEG68vKsTprtsjz1pEdicJKagyBPM44xQ08YvVArInFwaCdfTwotc8PcrYzhEBofwWFEJlof20vsBMRVNo_3bJ6VppjgUjdy9x"
+            src="https://lh3.googleusercontent.com/aida/AEtjO1XKMcRFTanevaj90cKvBEwuYo-nKXd0WNQFCiUIERi5tvpLocOHImBsco8Y0ssH3uTqkIamv7TOmxUeNmn-eOF0409tFZnb8PvJ_dNP5Bk88McCaW-ECdc2dJFUpqjUzn7H9B_i8K95x9bpEDWTt5Y-8AA-yYRuPgUJI1mJQaJj2ljyu8z_3wgq8Kr6STwbQO8yahjUbygM2VQSWk6c1h8z4oF_MuzNRPtpWKOt3HeCq_ZWSt7OkiHqHA"
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
           />
           <span className="font-bold text-lg text-on-surface">Reels Feed</span>
         </div>
@@ -131,10 +146,10 @@ function Home() {
       </header>
 
       {/* Main scrolling viewport (Desktop centered wrapper) */}
-      <div className="flex-1 flex justify-center items-center pt-14 pb-16 bg-slate-900 z-10 relative">
+      <div className="flex-1 flex justify-center items-center pt-14 pb-16 bg-slate-900 z-10 relative overflow-hidden">
         
         {/* Device Wrapper - Full Screen on mobile, centered phone container on PC */}
-        <div className="relative w-full max-w-md h-full bg-white shadow-2xl md:rounded-2xl md:border border-slate-800 flex flex-col overflow-hidden">
+        <div className="relative w-full max-w-md h-[calc(100vh-120px)] bg-white shadow-2xl md:rounded-2xl md:border border-slate-800 flex flex-col overflow-hidden my-auto">
           
           {/* TAB 1: REELS FEED */}
           {activeTab === 'reels' && (
@@ -142,7 +157,7 @@ function Home() {
               {/* Top Tabs Overlay */}
               <div className="absolute top-0 left-0 w-full z-30 pt-4 pb-4 flex justify-center gap-6 bg-gradient-to-b from-black/60 to-transparent">
                 <button 
-                  onClick={() => setActiveSubTab('trending')}
+                  onClick={() => handleSubTabChange('trending')}
                   className={`font-bold text-sm px-2 py-1 drop-shadow-md cursor-pointer transition-all ${
                     activeSubTab === 'trending' ? 'text-white border-b-2 border-white' : 'text-white/60 hover:text-white'
                   }`}
@@ -150,7 +165,7 @@ function Home() {
                   Trending
                 </button>
                 <button 
-                  onClick={() => setActiveSubTab('near-you')}
+                  onClick={() => handleSubTabChange('near-you')}
                   className={`font-bold text-sm px-2 py-1 drop-shadow-md cursor-pointer transition-all ${
                     activeSubTab === 'near-you' ? 'text-white border-b-2 border-white' : 'text-white/60 hover:text-white'
                   }`}
@@ -206,10 +221,10 @@ function Home() {
           )}
 
           {/* TAB 2: DISCOVER */}
-          {activeTab === 'discover' && <Discover />}
+          {activeTab === 'discover' && <Discover onSelectDish={handleSelectDish} />}
 
           {/* TAB 3: SAVED */}
-          {activeTab === 'saved' && <Saved />}
+          {activeTab === 'saved' && <Saved onSelectDish={handleSelectDish} />}
 
           {/* TAB 4: PROFILE */}
           {activeTab === 'profile' && <Profile />}

@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
-function Saved() {
+function getYouTubeId(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
+function Saved({ onSelectDish }) {
   const [savedItems, setSavedItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +62,7 @@ function Saved() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col p-6 overflow-y-auto pb-24">
+    <div className="w-full flex-1 min-h-0 flex flex-col p-6 overflow-y-auto pb-24">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-on-surface mb-1">Saved Dishes</h1>
@@ -83,20 +90,30 @@ function Saved() {
             return (
               <div
                 key={item._id}
-                className="group bg-surface-subtle rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 border border-slate-100 flex flex-col relative"
+                onClick={() => onSelectDish && onSelectDish(dish._id)}
+                className="group bg-surface-subtle rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 border border-slate-100 flex flex-col relative cursor-pointer"
               >
                 <div className="relative aspect-[9/16] w-full overflow-hidden bg-black">
-                  <video
-                    src={dish.video}
-                    className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
-                    muted
-                    playsInline
-                  />
+                  {getYouTubeId(dish.video) ? (
+                    <img
+                      src={`https://img.youtube.com/vi/${getYouTubeId(dish.video)}/hqdefault.jpg`}
+                      alt={dish.name}
+                      className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
+                    />
+                  ) : (
+                    <video
+                      src={dish.video}
+                      className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
+                      muted
+                      playsInline
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
                   
                   {/* Remove Bookmark Button (Top Right) */}
                   <button
-                    onClick={() => handleUnsave(dish._id)}
+                    onClick={(e) => { e.stopPropagation(); handleUnsave(dish._id); }}
                     className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center z-20 cursor-pointer shadow-md transition-all"
                     title="Remove Bookmark"
                   >

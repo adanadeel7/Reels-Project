@@ -9,7 +9,7 @@ foodRouter.post('/',authFoodPartnerMiddleware,createFood)
 
 foodRouter.post('/upload', authFoodPartnerMiddleware, upload.single('video'), uploadVideo)
 
-foodRouter.get("/", authUserMiddleware, getFoodItems)
+foodRouter.get("/", getFoodItems)
 
 foodRouter.get("/partner", authFoodPartnerMiddleware, getPartnerFood)
 
