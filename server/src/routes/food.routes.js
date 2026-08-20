@@ -1,12 +1,17 @@
 import express from "express"; 
-import  {createFood, getFoodItems } from "../controllers/food.controller.js";
+import  {createFood, getFoodItems, getPartnerFood, likeFood, saveFood, getSaveFood, uploadVideo } from "../controllers/food.controller.js";
 import {authFoodPartnerMiddleware,authUserMiddleware} from "../middlewares/auth.middleware.js";
+import upload from "../middlewares/upload.middleware.js";
 
 const foodRouter = express.Router()
 
 foodRouter.post('/',authFoodPartnerMiddleware,createFood)
 
+foodRouter.post('/upload', authFoodPartnerMiddleware, upload.single('video'), uploadVideo)
+
 foodRouter.get("/", authUserMiddleware, getFoodItems)
+
+foodRouter.get("/partner", authFoodPartnerMiddleware, getPartnerFood)
 
 
 foodRouter.post('/like', authUserMiddleware, likeFood)

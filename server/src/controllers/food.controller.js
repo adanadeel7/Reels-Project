@@ -1,4 +1,6 @@
 import foodItem from "../models/fooditem.model.js";
+import likeModel from "../models/like.model.js";
+import saveModel from "../models/save.model.js";
 
 async function createFood(req, res) {
   const { name, video, description } = req.body;
@@ -43,23 +45,22 @@ async function getFoodItems(req, res) {
   }
 }
 
-
 async function likeFood(req, res) {
   const { foodId } = req.body;
   const user = req.user;
 
-  const isAlreadyLiked = await likeModel.findOne({
-    user: user._id,
-    food: foodId,
-  });
-
-  if (isAlreadyLiked) {
-    await likeModel.deleteOne({
+  try {
+    const isAlreadyLiked = await likeModel.findOne({
       user: user._id,
       food: foodId,
     });
 
-    try {
+    if (isAlreadyLiked) {
+      await likeModel.deleteOne({
+        user: user._id,
+        food: foodId,
+      });
+
       await foodItem.findByIdAndUpdate(foodId, {
         $inc: { likeCount: -1 },
       });
@@ -67,14 +68,7 @@ async function likeFood(req, res) {
       return res.status(200).json({
         message: "Food unliked successfully",
       });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({
-        message: `Error Found: ${err}`,
-      });
-    }
-  } else {
-    try {
+    } else {
       const like = await likeModel.create({
         user: user._id,
         food: foodId,
@@ -88,53 +82,68 @@ async function likeFood(req, res) {
         message: "Food liked successfully",
         like,
       });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json({
-        message: `Error Found: ${err}`,
-      });
     }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: `Error Found: ${err}`,
+    });
   }
 }
 
 async function saveFood(req, res) {
   const { foodId } = req.body;
-
   const user = req.user;
 
-  const isAlreadySaved = await saveModel.findOne({
-    user: user._id,
-    food: foodId,
-  });
-
-  if (isAlreadySaved) {
-    await saveModel.deleteOne({
+  try {
+    const isAlreadySaved = await saveModel.findOne({
       user: user._id,
       food: foodId,
     });
 
-    await foodItem.findByIdAndUpdate(foodId, {
-      $inc: { savesCount: -1 },
-    });
+    if (isAlreadySaved) {
+      await saveModel.deleteOne({
+        user: user._id,
+        food: foodId,
+      });
 
-    return res.status(200).json({
-      message: "Food unsaved successfully",
+      await foodItem.findByIdAndUpdate(foodId, {
+        $inc: { savesCount: -1 },
+      });
+
+      return res.status(200).json({
+        message: "Food unsaved successfully",
+      });
+    } else {
+      const save = await saveModel.create({
+        user: user._id,
+        food: foodId,
+      });
+
+      await foodItem.findByIdAndUpdate(foodId, {
+        $inc: { savesCount: 1 },
+      });
+
+      return res.status(201).json({
+        message: "Food saved successfully",
+        save,
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: `Error Found: ${err}`,
     });
   }
+}
 
+async function getSaveFood(req, res) {
   try {
-    const save = await saveModel.create({
-      user: user._id,
-      food: foodId,
-    });
-
-    await foodItem.findByIdAndUpdate(foodId, {
-      $inc: { savesCount: 1 },
-    });
-
-    res.status(201).json({
-      message: "Food saved successfully",
-      save,
+    const user = req.user;
+    const savedFoods = await saveModel.find({ user: user._id }).populate('food');
+    return res.status(200).json({
+      message: "Saved foods retrieved successfully",
+      savedFoods: savedFoods || []
     });
   } catch (err) {
     console.log(err);
@@ -144,28 +153,36 @@ async function saveFood(req, res) {
   }
 }
 
-
-async function getSaveFood(req, res) {
-    try {
-    const user = req.user;
-
-    const savedFoods = await saveModel.find({ user: user._id }).populate('food');
-
-    if (!savedFoods || savedFoods.length === 0) {
-        return res.status(404).json({ message: "No saved foods found" });
-    }
-
-    res.status(200).json({
-        message: "Saved foods retrieved successfully",
-        savedFoods
+async function getPartnerFood(req, res) {
+  try {
+    const partnerId = req.foodPartner._id;
+    const items = await foodItem.find({ foodPartner: partnerId }).populate("foodPartner", "name email");
+    return res.status(200).json({
+      message: "Partner food items fetched successfully",
+      foodItems: items,
     });
-} catch(err) { 
+  } catch (err) {
     console.log(err);
     return res.status(500).json({
       message: `Error Found: ${err}`,
     });
-}
+  }
 }
 
+async function uploadVideo(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No video file uploaded" });
+    }
+    const videoUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    return res.status(200).json({
+      message: "Video uploaded successfully",
+      videoUrl
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: `Upload error: ${err.message}` });
+  }
+}
 
-export { createFood,getFoodItems,likeFood,saveFood,getSaveFood };
+export { createFood, getFoodItems, likeFood, saveFood, getSaveFood, getPartnerFood, uploadVideo };

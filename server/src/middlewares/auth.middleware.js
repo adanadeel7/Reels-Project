@@ -16,6 +16,12 @@ async function authFoodPartnerMiddleware(req,res,next) {
         const decoded =  jwt.verify(token,process.env.JWT_SECRET)
         const Partner = await foodPartner.findById(decoded.id)
 
+        if (!Partner) {
+            return res.status(401).json({
+                message: "Please Login Again"
+            })
+        }
+
         req.foodPartner = Partner
         
         next()
@@ -41,6 +47,13 @@ async function  authUserMiddleware(req,res,next) {
     try { 
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id); 
+
+        if (!user) {
+            return res.status(401).json({
+                message: "Please Login Again"
+            })
+        }
+
         req.user = user
         
         next()

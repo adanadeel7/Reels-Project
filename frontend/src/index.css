@@ -1,1 +1,52 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #b7122a;
+  --color-primary-container: #db313f;
+  --color-on-primary: #ffffff;
+  --color-surface: #faf8ff;
+  --color-on-surface: #181b26;
+  --color-on-surface-variant: #5b403f;
+  --color-outline-variant: #e4bebc;
+  --color-surface-subtle: #F8F8F8;
+  --color-surface-dim: #d7d9e8;
+  --color-surface-container: #ebedfc;
+  --color-surface-bright: #faf8ff;
+  --color-success: #48C479;
+  --color-warning: #FFBA00;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f3ff;
+  --color-surface-container-high: #e5e7f7;
+  --color-surface-container-highest: #e0e2f1;
+  --color-surface-tint: #bb162c;
+  --color-tertiary-container: #00837c;
+  --color-tertiary: #006762;
+  --color-secondary: #5f5e5e;
+  --color-secondary-container: #e4e2e1;
+  --color-secondary-fixed: #e4e2e1;
+  
+  --font-body-md: "Geist", sans-serif;
+  --font-body-sm: "Geist", sans-serif;
+  --font-body-lg: "Geist", sans-serif;
+  --font-display-lg: "Geist", sans-serif;
+  --font-headline-sm: "Geist", sans-serif;
+  --font-headline-md: "Geist", sans-serif;
+  --font-headline-lg: "Geist", sans-serif;
+  --font-label-lg: "Geist", sans-serif;
+  --font-label-md: "Geist", sans-serif;
+}
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    overscroll-behavior: none;
+  }
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+

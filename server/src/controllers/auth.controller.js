@@ -31,7 +31,7 @@ async function registerUser(req,res) {
 
     },jwt_secret)
 
-    res.cookie("token",token)
+    res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "lax" })
 
     res.status(201).json({
         message: "User registered Successfully",
@@ -53,7 +53,7 @@ async function loginUser(req,res) {
 
 
     if (!user) { 
-        res.status(400).json({
+        return res.status(400).json({
             message : "Invalid email or password"
         })
     }
@@ -61,7 +61,7 @@ async function loginUser(req,res) {
     const isPasswordValid = await bcrypt.compare(password, user.password)
 
     if (!isPasswordValid) { 
-        res.status(400).json({
+        return res.status(400).json({
             message : "Invalid email or password"
         })
     }
@@ -70,7 +70,7 @@ async function loginUser(req,res) {
         id:user._id
     },jwt_secret)
     
-    res.cookie("token",token)
+    res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "lax" })
     
     res.status(200).json({
         message: "User Login Successfully",
@@ -90,7 +90,11 @@ async function logoutUser(req,res) {
 } 
 
 async function registerFoodPartner(req,res) {
-     const {name, email, password} = req.body
+     const {name, email, password, contactName, phone, address} = req.body
+
+     if (!name || !email || !password || !contactName || !phone || !address) {
+         return res.status(400).json({ message: "All fields are required" })
+     }
 
     const isfoodPartnerAlreadyExit = await foodPartner.findOne({
         email
@@ -105,14 +109,17 @@ async function registerFoodPartner(req,res) {
     const food = await foodPartner.create({
         name, 
         email, 
-        password : hashedPassword
+        password : hashedPassword,
+        contactName,
+        phone,
+        address
     })
     const token = jwt.sign({
         id: food._id
 
     },jwt_secret)
 
-    res.cookie("token",token)
+    res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "lax" })
 
     res.status(201).json({
         message: "Food Partner registered Successfully",
@@ -133,7 +140,7 @@ async function loginFoodPartner(req,res){
 
 
     if (!food) { 
-        res.status(400).json({
+        return res.status(400).json({
             message : "Invalid email or password"
         })
     }
@@ -141,7 +148,7 @@ async function loginFoodPartner(req,res){
     const isFoodPasswordValid = await bcrypt.compare(password, food.password)
 
     if (!isFoodPasswordValid) { 
-        res.status(400).json({
+        return res.status(400).json({
             message : "Invalid email or password"
         })
     }
@@ -150,7 +157,7 @@ async function loginFoodPartner(req,res){
         id:food._id
     },jwt_secret)
     
-    res.cookie("token",token)
+    res.cookie("token", token, { httpOnly: true, secure: false, sameSite: "lax" })
     
     res.status(200).json({
         message: "User Login Successfully",
@@ -169,5 +176,38 @@ async function logoutFoodPartner(req,res) {
         })
 }
 
+async function updateUserProfile(req, res) {
+  const { name, email } = req.body;
+  const user = req.user;
 
-export {registerUser,loginUser,logoutUser,registerFoodPartner,loginFoodPartner,logoutFoodPartner}
+  try {
+    if (!name || !email) {
+      return res.status(400).json({ message: "Name and email are required" });
+    }
+
+    if (email !== user.email) {
+      const emailExists = await User.findOne({ email });
+      if (emailExists) {
+        return res.status(400).json({ message: "Email is already in use by another account" });
+      }
+    }
+
+    user.name = name;
+    user.email = email;
+    await user.save();
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export {registerUser,loginUser,logoutUser,registerFoodPartner,loginFoodPartner,logoutFoodPartner, updateUserProfile}
